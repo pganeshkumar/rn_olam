@@ -9,6 +9,16 @@
       "text": "Hello",
       "isDone": true,
       "id": 2
+    },
+    {
+      "text": "Learn react",
+      "isDone": false,
+      "id": 3
+    },
+    {
+      "text": "Learn react native",
+      "isDone": false,
+      "id": 4
     }
   ]
 }
