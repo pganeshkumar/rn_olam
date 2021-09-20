@@ -2,12 +2,12 @@ import React, {useContext, useMemo, useState} from 'react';
 import {View} from 'react-native';
 import CheckBoxOutline from '../../assets/icons/check_box_outline.svg';
 import CheckBox from '../../assets/icons/check_box.svg';
-import {ThemeContext} from '../../context/themeContext';
 import {BorderlessButton} from 'react-native-gesture-handler';
+import {useTheme} from '@react-navigation/native';
 
 const Checkbox = ({checked, onChange}) => {
   const [isChecked, setIsChecked] = useState(checked);
-  const {colors} = useContext(ThemeContext);
+  const {colors} = useTheme();
 
   const iconProps = useMemo(
     () => ({

@@ -1,16 +1,49 @@
 import React from 'react';
-import {LocaleProvider} from './src/context/localeContext';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import TodoApp from './src/TodoApp';
-import {ThemeProvider} from './src/context/themeContext';
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import Login from './src/pages/Login';
+import Register from './src/pages/Register';
+import {useColorScheme} from 'react-native';
+import Home from './src/pages/Home';
+
+const Stack = createNativeStackNavigator();
+
+const customDarkTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: '#000',
+  },
+};
+
+const customLightTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: '#fff',
+  },
+};
 
 const App = () => {
+  const scheme = useColorScheme();
   return (
-    <ThemeProvider>
-      <SafeAreaProvider>
-        <TodoApp />
-      </SafeAreaProvider>
-    </ThemeProvider>
+    <NavigationContainer
+      theme={scheme === 'dark' ? customDarkTheme : customLightTheme}>
+      <Stack.Navigator>
+        <Stack.Group
+          screenOptions={{
+            headerShown: false,
+          }}>
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Register" component={Register} />
+        </Stack.Group>
+        <Stack.Screen name="Home" component={Home} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 

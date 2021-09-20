@@ -1,13 +1,13 @@
-import React, {useContext} from 'react';
+import React from 'react';
 import {View} from 'react-native';
 import {RectButton} from 'react-native-gesture-handler';
-import {ThemeContext} from '../../context/themeContext';
+import {useTheme} from '@react-navigation/native';
 import Typography from '../Typography';
 import styles from './styles';
 import globalStyle from '../../globalStyle';
 
 const Button = ({title, style, disabled, ...rest}) => {
-  const {colors} = useContext(ThemeContext);
+  const {colors} = useTheme();
   return (
     <RectButton
       style={[
