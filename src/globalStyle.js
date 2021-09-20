@@ -14,6 +14,12 @@ const globalStyles = StyleSheet.create({
   column: {
     flexDirection: 'column',
   },
+  hCenter: {
+    justifyContent: 'center',
+  },
+  vCenter: {
+    alignItems: 'center',
+  },
 });
 
 export default globalStyles;

@@ -5,7 +5,7 @@ import CheckBox from '../../assets/icons/check_box.svg';
 import {ThemeContext} from '../../context/themeContext';
 import {BorderlessButton} from 'react-native-gesture-handler';
 
-const Checkbox = ({checked}) => {
+const Checkbox = ({checked, onChange}) => {
   const [isChecked, setIsChecked] = useState(checked);
   const {colors} = useContext(ThemeContext);
 
@@ -18,16 +18,21 @@ const Checkbox = ({checked}) => {
     [colors.primary],
   );
 
+  const toggleCheckbox = () => {
+    setIsChecked(val => {
+      onChange(!val);
+      return !val;
+    });
+  };
+
   return (
-    <View>
-      <BorderlessButton onPress={() => setIsChecked(val => !val)}>
-        {isChecked ? (
-          <CheckBox {...iconProps} />
-        ) : (
-          <CheckBoxOutline {...iconProps} />
-        )}
-      </BorderlessButton>
-    </View>
+    <BorderlessButton onPress={toggleCheckbox}>
+      {isChecked ? (
+        <CheckBox {...iconProps} />
+      ) : (
+        <CheckBoxOutline {...iconProps} />
+      )}
+    </BorderlessButton>
   );
 };
 
