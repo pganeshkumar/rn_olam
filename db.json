@@ -20,5 +20,11 @@
       "isDone": false,
       "id": 4
     }
+  ],
+  "users": [
+    {
+      "username": "yagnesh.modh@gmail.com",
+      "password": "Password1!"
+    }
   ]
 }

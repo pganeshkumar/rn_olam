@@ -13,6 +13,15 @@ const styles = colors =>
       backgroundColor: colors.card,
       color: colors.text,
     },
+    iconStyle: {
+      display: 'flex',
+      justifyContent: 'center',
+      position: 'absolute',
+      right: 10,
+      top: 0,
+      height: 40,
+      zIndex: 10,
+    },
   });
 
 export default styles;

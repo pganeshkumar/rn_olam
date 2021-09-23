@@ -3,14 +3,113 @@ import {
   DarkTheme,
   DefaultTheme,
   NavigationContainer,
+  useNavigationContainerRef,
 } from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import Login from './src/pages/Login';
-import Register from './src/pages/Register';
+import * as Keychain from 'react-native-keychain';
 import {useColorScheme} from 'react-native';
-import Home from './src/pages/Home';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import HomeFilledIcon from './src/assets/icons/home_filled.svg';
+import HomeOutlineIcon from './src/assets/icons/home_outline.svg';
+import SettingsFilledIcon from './src/assets/icons/settings_filled.svg';
+import SettingOutlineIcon from './src/assets/icons/settings_outline.svg';
+import MenuIcon from './src/assets/icons/menu.svg';
+import {BorderlessButton} from 'react-native-gesture-handler';
+import {createDrawerNavigator} from '@react-navigation/drawer';
 
 const Stack = createNativeStackNavigator();
+
+const Tab = createBottomTabNavigator();
+
+const Drawer = createDrawerNavigator();
+
+const SettingsStack = createNativeStackNavigator();
+
+const DrawerContainer = () => {
+  return (
+    <Drawer.Navigator>
+      <Drawer.Screen
+        name="Home"
+        getComponent={() => require('./src/pages/Home').default}
+      />
+      <Drawer.Screen
+        name="Notifications"
+        getComponent={() => require('./src/pages/Settings').default}
+      />
+    </Drawer.Navigator>
+  );
+};
+
+const SettingsStackNavigator = () => {
+  return (
+    <SettingsStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
+      <SettingsStack.Screen
+        name="SettingsScreen"
+        getComponent={() => require('./src/pages/Settings').default}
+      />
+      <SettingsStack.Screen
+        name="ProfileScreen"
+        getComponent={() => require('./src/pages/Profile').default}
+      />
+      <SettingsStack.Screen
+        name="ChangePasswordScreen"
+        getComponent={() => require('./src/pages/ChangePassword').default}
+      />
+    </SettingsStack.Navigator>
+  );
+};
+
+const MainTab = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={({route, navigation}) => {
+        return {
+          tabBarIcon: ({focused, color, size}) => {
+            const iconProps = {
+              height: size,
+              width: size,
+              fill: color,
+            };
+            switch (route.name) {
+              case 'Home':
+                if (focused) {
+                  return <HomeFilledIcon {...iconProps} />;
+                } else {
+                  return <HomeOutlineIcon {...iconProps} />;
+                }
+              case 'Settings':
+                if (focused) {
+                  return <SettingsFilledIcon {...iconProps} />;
+                } else {
+                  return <SettingOutlineIcon {...iconProps} />;
+                }
+
+              default:
+                return null;
+            }
+          },
+          headerLeft: () => {
+            return (
+              <BorderlessButton
+                style={{marginLeft: 10}}
+                onPress={() => navigation.openDrawer()}>
+                <MenuIcon height={24} width={24} fill="red" />
+              </BorderlessButton>
+            );
+          },
+        };
+      }}>
+      <Tab.Screen
+        name="Home"
+        getComponent={() => require('./src/pages/Home').default}
+      />
+      <Tab.Screen name="Settings" component={SettingsStackNavigator} />
+    </Tab.Navigator>
+  );
+};
 
 const customDarkTheme = {
   ...DarkTheme,
@@ -30,18 +129,44 @@ const customLightTheme = {
 
 const App = () => {
   const scheme = useColorScheme();
+  const navigationRef = useNavigationContainerRef();
   return (
     <NavigationContainer
-      theme={scheme === 'dark' ? customDarkTheme : customLightTheme}>
+      ref={navigationRef}
+      theme={scheme === 'dark' ? customDarkTheme : customLightTheme}
+      onReady={async () => {
+        try {
+          // const user = await AsyncStorage.getItem('user');
+          const credentials = await Keychain.getGenericPassword();
+
+          if (credentials) {
+            navigationRef.resetRoot({
+              index: 0,
+              routes: [{name: 'Main'}],
+            });
+          } else {
+            navigationRef.resetRoot({
+              index: 0,
+              routes: [{name: 'Login'}],
+            });
+          }
+        } catch (error) {}
+      }}>
       <Stack.Navigator>
         <Stack.Group
           screenOptions={{
             headerShown: false,
           }}>
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="Register" component={Register} />
+          <Stack.Screen
+            name="Login"
+            getComponent={() => require('./src/pages/Login').default}
+          />
+          <Stack.Screen
+            name="Register"
+            getComponent={() => require('./src/pages/Register').default}
+          />
+          <Stack.Screen name="Main" component={MainTab} />
         </Stack.Group>
-        <Stack.Screen name="Home" component={Home} />
       </Stack.Navigator>
     </NavigationContainer>
   );
