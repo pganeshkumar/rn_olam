@@ -9,13 +9,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff',
   },
-  flex: {
-    flex: 1,
-  },
-  center: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
 });
 
 export default styles;

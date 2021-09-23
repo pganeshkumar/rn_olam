@@ -1,11 +1,10 @@
-import React, {useContext, memo} from 'react';
+import React, {memo} from 'react';
 import {TextInput} from 'react-native';
 import styles from './styles';
-import {ThemeContext} from '../../context/themeContext';
+import {useTheme} from '@react-navigation/native';
 
 const Textbox = ({style, ...rest}) => {
-  console.warn('Textbox Rendered');
-  const {colors} = useContext(ThemeContext);
+  const {colors} = useTheme();
   return <TextInput style={[styles(colors).textbox, style]} {...rest} />;
 };
 
