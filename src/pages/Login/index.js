@@ -1,99 +1,101 @@
-import React from 'react';
-import {View} from 'react-native';
-import Typography from '../../components/Typography';
+import React, {useState} from 'react';
+import {View, KeyboardAvoidingView, Keyboard, Platform} from 'react-native';
 import globalStyles from '../../globalStyle';
 import Image from 'react-native-fast-image';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {Formik} from 'formik';
-import Textbox from '../../components/Textbox';
-import Button from '../../components/Button';
-
-const validateLogin = values => {
-  let errors = {};
-  if (!values.username) {
-    errors.username = 'Username Required';
-  }
-  if (!values.password) {
-    errors.password = 'Password Required';
-  }
-  return errors;
-};
+import {fields, initialValues} from './fields';
+import Form from '../../components/Form';
+import Typography from '../../components/Typography';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useTheme} from '@react-navigation/native';
+import {useEffect} from 'react/cjs/react.development';
+import * as Keychain from 'react-native-keychain';
+import axiosInstance from '../../utils/axiosInstance';
 
 const Login = ({navigation}) => {
-  const insets = useSafeAreaInsets();
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const {colors} = useTheme();
 
-  const onSubmit = values => {
-    console.warn(values);
+  useEffect(() => {
+    const keyboardDidShow = () => {
+      setIsKeyboardVisible(true);
+    };
+    const keyboardDidHide = () => {
+      setIsKeyboardVisible(false);
+    };
+    const showSubscription = Keyboard.addListener(
+      'keyboardDidShow',
+      keyboardDidShow,
+    );
+    const hideSubscription = Keyboard.addListener(
+      'keyboardDidHide',
+      keyboardDidHide,
+    );
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  const onSubmit = async (values, actions) => {
+    try {
+      const res = await axiosInstance.get('users', {
+        params: values,
+      });
+      console.warn(res.data);
+      if (res.data.length > 0) {
+        await Keychain.setGenericPassword(values.username, values.password);
+
+        // await AsyncStorage.setItem('user', JSON.stringify(res.data[0]));
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Main'}],
+        });
+      } else {
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
-    <View
-      style={[
-        globalStyles.flex,
-        {
-          paddingTop: insets.top,
-        },
-      ]}>
-      <Image
-        source={{
-          uri: 'https://yagneshmodh.com/apple-touch-icon.png',
-          priority: Image.priority.high,
-        }}
-        style={{
-          height: 150,
-        }}
-        resizeMode="contain"
-      />
-      <Formik
-        initialValues={{
-          username: '',
-          password: '',
-        }}
-        validate={validateLogin}
-        onSubmit={onSubmit}>
-        {({
-          values,
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          errors,
-          touched,
-        }) => {
-          return (
-            <View style={{marginHorizontal: 10}}>
-              <View style={{marginVertical: 10}}>
-                <Textbox
-                  name="username"
-                  placeholder="Username"
-                  value={values.username}
-                  onChangeText={handleChange('username')}
-                  onBlur={handleBlur('username')}
-                />
-                {touched.username && errors.username && (
-                  <Typography variant="error">{errors.username}</Typography>
-                )}
-              </View>
-              <View style={{marginVertical: 10}}>
-                <Textbox
-                  name="password"
-                  placeholder="Password"
-                  value={values.password}
-                  onChangeText={handleChange('password')}
-                  onBlur={handleBlur('password')}
-                  secureTextEntry
-                />
-                {touched.password && errors.password && (
-                  <Typography variant="error">{errors.password}</Typography>
-                )}
-              </View>
-              <Button
-                title="Login"
-                onPress={handleSubmit}
-                style={{marginVertical: 10}}
-              />
-            </View>
-          );
-        }}
-      </Formik>
+    <View style={globalStyles.flex}>
+      <KeyboardAvoidingView
+        behavior="padding"
+        enabled={Platform.OS === 'ios'}
+        style={[globalStyles.flex, {justifyContent: 'space-evenly'}]}>
+        <Image
+          source={{
+            uri: 'https://yagneshmodh.com/apple-touch-icon.png',
+            priority: Image.priority.high,
+          }}
+          style={{height: isKeyboardVisible ? 50 : 150}}
+          resizeMode="contain"
+        />
+        <Form
+          initialValues={initialValues}
+          onSubmit={onSubmit}
+          fields={fields}
+          btnProps={{
+            title: 'Login',
+          }}
+        />
+        <Typography
+          variant="body1"
+          style={{
+            textAlign: 'center',
+          }}>
+          {`Dont hanve account? Please `}
+          <Typography
+            variant="body1"
+            style={{
+              color: colors.primary,
+            }}
+            onPress={() => {
+              navigation.navigate('Register');
+            }}>
+            Register
+          </Typography>
+        </Typography>
+      </KeyboardAvoidingView>
     </View>
   );
 };
